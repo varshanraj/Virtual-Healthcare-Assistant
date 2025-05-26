@@ -4,6 +4,7 @@ This model is an intelligent, voice-driven health advisor that combines real-tim
 
 
 
+
 **Features:**
 
 
@@ -19,6 +20,7 @@ Simple fallback mechanisms for unsupported languages or errors
 
 
 
+
 **How It Works:**
 
 
@@ -28,6 +30,7 @@ Once identified, the assistant greets the user and begins voice-based interactio
 The user speaks a query, which is recorded and transcribed using Whisper.
 The transcribed text is analyzed using Groq’s LLaMA-3 API for a health-focused response.
 The response is spoken back to the user in the detected language.
+
 
 
 
@@ -48,6 +51,7 @@ I/O: sounddevice, scipy.io.wavfile, tempfile
 
 
 
+
 **Requirements:**
 
 
@@ -57,11 +61,13 @@ Groq API Key (for Whisper and LLaMA-3 access)
 
 
 
+
 **Python Libraries:**
 
 
 Install the dependencies using pip:
 pip install opencv-python face_recognition gtts pyttsx3 pygame sounddevice scipy langdetect speechrecognition pyaudio groq
+
 
 
 
@@ -84,6 +90,7 @@ project/
 
 
 
+
 **Setup and Usage:**
 
 
@@ -94,6 +101,7 @@ Look at the camera. If unrecognized, enter your name when prompted.
 Wait for the assistant to greet you.
 Speak a medical question. The assistant will reply with a concise and helpful response.
 Say "bye", "exit", or "stop" to end the session.
+
 
 
 
