@@ -1,3 +1,5 @@
+**Description:**
+
 This model is an intelligent, voice-driven health advisor that combines real-time face recognition, speech transcription, language detection, and LLM-powered medical interaction. It uses Python and integrates the Groq API (Whisper and LLaMA-3), delivering concise and empathetic responses to user health queries in English and Tamil.
 
 
@@ -33,10 +35,15 @@ The response is spoken back to the user in the detected language.
 
 
 Languages: Python
+
 AI/ML: face_recognition, Groq Whisper and LLaMA-3
+
 Speech: gTTS, pyttsx3, pyaudio, pygame
+
 Image Processing: OpenCV
+
 NLP: langdetect, regular expressions
+
 I/O: sounddevice, scipy.io.wavfile, tempfile
 
 
