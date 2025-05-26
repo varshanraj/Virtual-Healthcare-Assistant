@@ -17,7 +17,7 @@ from gtts import gTTS
 from groq import Groq
 
 # === Configuration ===
-GROQ_API_KEY = "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"
+GROQ_API_KEY = "YOUR_API_KEY_HERE"
 DATA_DIR = os.path.join(os.path.dirname(__file__), "Face_detection", "faces_data")
 CLEANUP_DAYS = 30  # Days after which unused face data is deleted
 
