@@ -1,0 +1,137 @@
+using UnityEngine;
+using System.IO;
+using System.Collections;
+using UnityEngine.Networking;
+
+public class AutoPlayUpdatedAudio : MonoBehaviour
+{
+    public string absoluteAudioPath = @"E:\AR_project\response.mp3";
+
+    private AudioSource audioSource;
+    private FileSystemWatcher fileWatcher;
+    private bool fileChanged = false;
+    private float lastChangedTime;
+    private float delayAfterChange = 0.5f; // Delay to ensure file write finishes
+
+    void Start()
+    {
+        audioSource = GetComponent<AudioSource>();
+        if (audioSource == null)
+        {
+            Debug.LogError("Missing AudioSource component.");
+            return;
+        }
+
+        if (!File.Exists(absoluteAudioPath))
+        {
+            Debug.LogError("Audio file not found at: " + absoluteAudioPath);
+            return;
+        }
+
+        StartFileWatcher();
+        StartCoroutine(LoadAndPlayAudio());
+    }
+
+    void Update()
+    {
+        if (fileChanged && Time.time - lastChangedTime > delayAfterChange)
+        {
+            fileChanged = false;
+            StartCoroutine(LoadAndPlayAudio());
+        }
+    }
+
+    void OnDestroy()
+    {
+        if (fileWatcher != null)
+        {
+            fileWatcher.EnableRaisingEvents = false;
+            fileWatcher.Dispose();
+        }
+    }
+
+    void StartFileWatcher()
+    {
+        string dirPath = Path.GetDirectoryName(absoluteAudioPath);
+        string fileName = Path.GetFileName(absoluteAudioPath);
+
+        fileWatcher = new FileSystemWatcher
+        {
+            Path = dirPath,
+            Filter = fileName,
+            NotifyFilter = NotifyFilters.LastWrite
+        };
+
+        fileWatcher.Changed += OnAudioFileChanged;
+        fileWatcher.EnableRaisingEvents = true;
+    }
+
+    void OnAudioFileChanged(object sender, FileSystemEventArgs e)
+    {
+        Debug.Log("Detected change in audio file: " + e.FullPath);
+        fileChanged = true;
+        lastChangedTime = Time.time;
+    }
+
+    IEnumerator LoadAndPlayAudio()
+    {
+        yield return WaitUntilFileIsReady();
+
+        string uri = "file:///" + absoluteAudioPath.Replace("\\", "/");
+        using (UnityWebRequest www = UnityWebRequestMultimedia.GetAudioClip(uri, GetAudioTypeFromExtension(absoluteAudioPath)))
+        {
+            yield return www.SendWebRequest();
+
+            if (www.result != UnityWebRequest.Result.Success)
+            {
+                Debug.LogError("Failed to load audio: " + www.error);
+                yield break;
+            }
+
+            AudioClip clip = DownloadHandlerAudioClip.GetContent(www);
+            if (clip == null)
+            {
+                Debug.LogError("Failed to create audio clip.");
+                yield break;
+            }
+
+            audioSource.Stop();
+            audioSource.clip = clip;
+            audioSource.Play();
+
+            Debug.Log("Playing updated audio.");
+        }
+    }
+
+    IEnumerator WaitUntilFileIsReady()
+    {
+        float timeout = Time.time + 5f;
+
+        while (Time.time < timeout)
+        {
+            try
+            {
+                using (FileStream stream = File.Open(absoluteAudioPath, FileMode.Open, FileAccess.Read, FileShare.Read))
+                {
+                    break; // File is ready
+                }
+            }
+            catch { }
+
+            yield return new WaitForSeconds(0.1f);
+        }
+    }
+
+    AudioType GetAudioTypeFromExtension(string path)
+    {
+        string ext = Path.GetExtension(path).ToLower();
+        switch (ext)
+        {
+            case ".mp3": return AudioType.MPEG;
+            case ".wav": return AudioType.WAV;
+            case ".ogg": return AudioType.OGGVORBIS;
+            default: return AudioType.UNKNOWN;
+        }
+    }
+}
+
